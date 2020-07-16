@@ -8,6 +8,11 @@ module.exports.insertToVideo = async data => {
     return excute(sql);
 }
 
+module.exports.getVideos = () => {
+    const sql = `SElECT * FROM video order by id desc limit 10`;
+    return excute(sql);
+}
+
 const excute = (sql) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -17,8 +22,9 @@ const excute = (sql) => {
                     reject(err)
                 }
 
-                resolve({ status: "success" });
+                resolve({ status: "success", data: res });
             })
         })
     })
+
 }

@@ -11,8 +11,8 @@ app.set('port', port);
 // Load middlewares
 app.use(logger('dev'));
 const bodyParser = require('body-parser');
-const { insertToVideo } = require('./src/db');
-const { fetchConvertUrlFromDb } = require('./src/cralwer');
+const { insertToVideo, getVideos } = require('./src/db');
+const { fetchConvertUrlFromDb, convertYoutubeUrl } = require('./src/cralwer');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -29,10 +29,47 @@ app.get('/crawler', (req, res, next) => {
 
 });
 
+app.post('/convertYoutube', (req, res, next) => {
+    convertYoutubeUrl(req.body.url).then(url => {
+        let rightUrl = encodeURIComponent(url);
+        rightUrl = decodeURIComponent(url);
+        sendResponse(res, {
+            responeCode: '00',
+            data: {
+                url: rightUrl
+            }
+        })
+    }).catch(err => {
+        sendResponse(res, {
+            responeCode: '99',
+            data: {
+                err: err
+            }
+        })
+    })
+})
+
+app.get('/getVideos', (req, res, next) => {
+    getVideos().then(rows => {
+        // console.log(res)
+        sendResponse(res, {
+            responeCode: "00",
+            data: rows.data
+        })
+    }).catch(err => {
+        console.log(err);
+        sendResponse(res, {
+            responeCode: '99',
+            data: {
+                err: err
+            }
+        })
+    })
+})
 
 app.post('/addUrl', (req, res, next) => {
     console.log(req.body);
-    fetchConvertUrlFromDb(req.body.url)
+    convertFBUrl(req.body.url)
         .then(url =>
             insertToVideo({
                 title: req.body.title,
